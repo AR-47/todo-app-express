@@ -8,6 +8,7 @@ import {
   getDbItemById,
   DbItem,
   updateDbItemById,
+  deleteDbItemById,
 } from "./db";
 import filePath from "./filePath";
 
@@ -61,7 +62,7 @@ app.get<{ id: string }>("/items/:id", (req, res) => {
 
 // DELETE /items/:id
 app.delete<{ id: string }>("/items/:id", (req, res) => {
-  const matchingTodo = getDbItemById(parseInt(req.params.id));
+  const matchingTodo = deleteDbItemById(parseInt(req.params.id));
   if (matchingTodo === "not found") {
     res.status(404).json(matchingTodo);
   } else {
