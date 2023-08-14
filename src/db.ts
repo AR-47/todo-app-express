@@ -4,7 +4,7 @@ export interface DbItem {
   title: string;
   description: string;
   status: "completed" | "pending";
-  creationDate: string;
+  creationDate: Date;
 }
 
 export interface DbItemWithId extends DbItem {
@@ -24,12 +24,13 @@ let idCounter = 0;
  */
 export const addDummyDbItems = (n: number): DbItemWithId[] => {
   const createdTodos: DbItemWithId[] = [];
+  const currentDate = new Date();
   for (let count = 0; count < n; count++) {
     const createdTodo = addDbItem({
       title: faker.name.findName(),
       description: faker.lorem.sentences(3),
       status: "pending",
-      creationDate: "05-08-23",
+      creationDate: currentDate,
     });
     createdTodos.push(createdTodo);
   }
