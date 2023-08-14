@@ -14,7 +14,6 @@ import filePath from "./filePath";
 
 // loading in some dummy items into the database
 // (comment out if desired, or change the number)
-addDummyDbItems(5);
 
 const app = express();
 
