@@ -1,7 +1,6 @@
 import faker from "faker";
 
 export interface DbItem {
-  title: string;
   description: string;
   status: "completed" | "pending";
   creationDate: Date;
@@ -27,8 +26,7 @@ export const addDummyDbItems = (n: number): DbItemWithId[] => {
   const currentDate = new Date();
   for (let count = 0; count < n; count++) {
     const createdTodo = addDbItem({
-      title: faker.name.findName(),
-      description: faker.lorem.sentences(3),
+      description: faker.lorem.sentences(1),
       status: "pending",
       creationDate: currentDate,
     });
