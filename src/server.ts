@@ -52,6 +52,7 @@ app.get("/items/:id", async (req, res) => {
 // POST /items
 app.post("/items", async (req, res) => {
   const { description } = req.body;
+  console.log(description);
   const createdTodo = await client.query(
     "insert into todos (description) values ($1) returning *",
     [description]
@@ -64,22 +65,54 @@ app.patch("/items/:id", async (req, res) => {
   const id = req.params.id;
   const { description, status } = req.body;
   console.log("description: ", description, " status: ", status);
-  const result = await client.query(
-    "update todos set description = ($1), status = ($2) where id = ($3) returning *",
-    [description, status, id]
-  );
-  if (result.rowCount === 1) {
-    res.status(200).json({
-      status: "success",
-      updatedTodo: result.rows,
-    });
+  if (description === undefined) {
+    const result = await client.query(
+      "update todos set status = ($1) where id = ($2) returning *",
+      [status, id]
+    );
+    result.rowCount === 1
+      ? res.status(200).json({
+          status: "success",
+          updatedTodo: result.rows,
+        })
+      : res.status(404).json({
+          status: "fail",
+          data: {
+            id: "Could not find a todo with that id identifier",
+          },
+        });
+  } else if (status === undefined) {
+    const result = await client.query(
+      "update todos set description = ($1) where id = ($2) returning *",
+      [description, id]
+    );
+    result.rowCount === 1
+      ? res.status(200).json({
+          status: "success",
+          updatedTodo: result.rows,
+        })
+      : res.status(404).json({
+          status: "fail",
+          data: {
+            id: "Could not find a todo with that id identifier",
+          },
+        });
   } else {
-    res.status(404).json({
-      status: "fail",
-      data: {
-        id: "Could not find a todo with that id identifier",
-      },
-    });
+    const result = await client.query(
+      "update todos set description = ($1), status = ($2) where id = ($3) returning *",
+      [description, status, id]
+    );
+    result.rowCount === 1
+      ? res.status(200).json({
+          status: "success",
+          updatedTodo: result.rows,
+        })
+      : res.status(404).json({
+          status: "fail",
+          data: {
+            id: "Could not find a todo with that id identifier",
+          },
+        });
   }
 });
 
