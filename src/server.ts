@@ -8,8 +8,7 @@ import filePath from "./filePath";
 dotenv.config();
 
 const client = new Client({
-  connectionString:
-    "postgres://braxxhew:K5BsjL993Udm4LnwVOmQimzIOvHmCavn@trumpet.db.elephantsql.com/braxxhew",
+  connectionString: process.env.DATABASE_URL,
 });
 
 client.connect();
