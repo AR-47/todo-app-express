@@ -8,7 +8,7 @@ import filePath from "./filePath";
 dotenv.config();
 
 const client = new Client({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL_STAGING,
 });
 
 client.connect();
