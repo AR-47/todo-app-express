@@ -15,6 +15,8 @@ client.connect();
 
 const app = express();
 
+process.env.TZ = "Europe/London";
+
 /** Parses JSON data in a request automatically */
 app.use(express.json());
 /** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
@@ -54,10 +56,10 @@ app.get("/items/:id", async (req, res) => {
 
 // POST /items
 app.post("/items", async (req, res) => {
-  const { description } = req.body;
+  const { description, dueDate } = req.body;
   const createdTodo = await client.query(
-    "insert into todos (description) values ($1) returning *",
-    [description]
+    "insert into todos (description, dueDate) values ($1, $2) returning *",
+    [description, dueDate]
   );
   res.status(201).json(createdTodo.rows);
 });
