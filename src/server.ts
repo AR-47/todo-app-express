@@ -46,7 +46,7 @@ app.get("/items/:id", async (req, res) => {
   );
   if (id === undefined) {
     res.status(404).json({
-      status: "fail",
+      status: "Error",
       message: "Could not find todo with that id",
     });
   } else {
@@ -58,7 +58,7 @@ app.get("/items/:id", async (req, res) => {
 app.post("/items", async (req, res) => {
   const { description, dueDate } = req.body;
   const createdTodo = await client.query(
-    "insert into todos (description, dueDate) values ($1, $2) returning *",
+    `insert into todos (description, "dueDate") values ($1, $2) returning *`,
     [description, dueDate]
   );
   res.status(201).json(createdTodo.rows);
