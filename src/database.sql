@@ -1,7 +1,7 @@
 CREATE TABLE todos (
-    id serial primary key,
-    description text not null,
-    status text not null default 'pending' check (status in ('pending','completed')),
-    creationDate timestamp not null default now(),
-    dueDate timestamp not null
+    id SERIAL PRIMARY KEY,
+    description TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (STATUS IN ('pending','completed')),
+    creationDate DATE NOT NULL DEFAULT CURRENT_DATE,
+    dueDate DATE NOT NULL
 );
