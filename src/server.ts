@@ -3,6 +3,7 @@ import cors from "cors";
 import { Client } from "pg";
 import dotenv from "dotenv";
 import filePath from "./filePath";
+import morgan from "morgan";
 
 // read in contents of any environment variables in the .env file
 dotenv.config();
@@ -21,6 +22,7 @@ process.env.TZ = "Europe/London";
 app.use(express.json());
 /** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
 app.use(cors());
+app.use(morgan("combined"));
 
 // use the environment variable PORT, or 4000 as a fallback
 const PORT_NUMBER = process.env.PORT ?? 4000;
