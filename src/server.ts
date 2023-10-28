@@ -16,8 +16,6 @@ client.connect();
 
 const app = express();
 
-process.env.TZ = "Europe/London";
-
 /** Parses JSON data in a request automatically */
 app.use(express.json());
 /** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
