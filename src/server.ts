@@ -9,14 +9,12 @@ import morgan from "morgan";
 dotenv.config();
 
 const client = new Client({
-  connectionString: process.env.DATABASE_URL_STAGING,
+  connectionString: process.env.DATABASE_URL,
 });
 
 client.connect();
 
 const app = express();
-
-process.env.TZ = "Europe/London";
 
 /** Parses JSON data in a request automatically */
 app.use(express.json());
@@ -58,10 +56,10 @@ app.get("/items/:id", async (req, res) => {
 
 // POST /items
 app.post("/items", async (req, res) => {
-  const { description, dueDate } = req.body;
+  const { description } = req.body;
   const createdTodo = await client.query(
-    "insert into todos (description, dueDate) values ($1, $2) returning *",
-    [description, dueDate]
+    "insert into todos (description) values ($1) returning *",
+    [description]
   );
   res.status(201).json(createdTodo.rows);
 });
