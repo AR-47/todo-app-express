@@ -67,50 +67,38 @@ app.post("/items", async (req, res) => {
 // PATCH /items/:id
 app.patch("/items/:id", async (req, res) => {
   const id = req.params.id;
-  const { description, status } = req.body;
-  if (description === undefined) {
-    const result = await client.query(
-      "update todos set status = ($1) where id = ($2) returning *",
-      [status, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
-  } else if (status === undefined) {
-    const result = await client.query(
-      "update todos set description = ($1) where id = ($2) returning *",
-      [description, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
-  } else {
-    const result = await client.query(
-      "update todos set description = ($1), status = ($2) where id = ($3) returning *",
-      [description, status, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
+  const { description, status, dueDate } = req.body;
+
+  const updateTextArray = [];
+  const updateValuesArray = [];
+
+  if (description) {
+    updateTextArray.push(`description = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(description);
   }
+  if (status) {
+    updateTextArray.push(`status = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(status);
+  }
+  if (dueDate) {
+    updateTextArray.push(`"dueDate" = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(dueDate);
+  }
+
+  updateValuesArray.push(id);
+
+  const updateQueryText = `UPDATE todos SET ${updateTextArray.join(
+    ", "
+  )} WHERE id = ($${updateValuesArray.length}) returning *`;
+
+  const updatedTodo = await client.query(updateQueryText, updateValuesArray);
+
+  updatedTodo.rowCount === 1
+    ? res.status(200).json(updatedTodo.rows)
+    : res.status(404).json({
+        status: "Error",
+        id: "Could not find a todo with that id",
+      });
 });
 
 // DELETE /items/:id
@@ -122,13 +110,13 @@ app.delete("/items/:id", async (req, res) => {
 
   if (didRemove) {
     res.status(200).json({
-      status: "success",
-      message: `Deleted signature with id ${id}`,
+      status: "Success",
+      message: `Deleted todo with id ${id}`,
     });
   } else {
     res.status(404).json({
-      status: "fail",
-      message: "Could not find a signature with that id identifier",
+      status: "Error",
+      message: "Could not find a todo with that id identifier",
     });
   }
 });
