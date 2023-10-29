@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 /** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
 app.use(cors());
-app.use(morgan("combined"));
+app.use(morgan("tiny"));
 
 // use the environment variable PORT, or 4000 as a fallback
 const PORT_NUMBER = process.env.PORT ?? 4000;
@@ -46,7 +46,7 @@ app.get("/items/:id", async (req, res) => {
   );
   if (id === undefined) {
     res.status(404).json({
-      status: "fail",
+      status: "Error",
       message: "Could not find todo with that id",
     });
   } else {
@@ -58,8 +58,8 @@ app.get("/items/:id", async (req, res) => {
 app.post("/items", async (req, res) => {
   const { description } = req.body;
   const createdTodo = await client.query(
-    "insert into todos (description) values ($1) returning *",
-    [description]
+    `insert into todos (description, "dueDate") values ($1, $2) returning *`,
+    [description, dueDate]
   );
   res.status(201).json(createdTodo.rows);
 });
@@ -67,50 +67,38 @@ app.post("/items", async (req, res) => {
 // PATCH /items/:id
 app.patch("/items/:id", async (req, res) => {
   const id = req.params.id;
-  const { description, status } = req.body;
-  if (description === undefined) {
-    const result = await client.query(
-      "update todos set status = ($1) where id = ($2) returning *",
-      [status, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
-  } else if (status === undefined) {
-    const result = await client.query(
-      "update todos set description = ($1) where id = ($2) returning *",
-      [description, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
-  } else {
-    const result = await client.query(
-      "update todos set description = ($1), status = ($2) where id = ($3) returning *",
-      [description, status, id]
-    );
-    result.rowCount === 1
-      ? res.status(200).json({
-          status: "success",
-          updatedTodo: result.rows,
-        })
-      : res.status(404).json({
-          status: "fail",
-          id: "Could not find a todo with that id identifier",
-        });
+  const { description, status, dueDate } = req.body;
+
+  const updateTextArray = [];
+  const updateValuesArray = [];
+
+  if (description) {
+    updateTextArray.push(`description = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(description);
   }
+  if (status) {
+    updateTextArray.push(`status = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(status);
+  }
+  if (dueDate) {
+    updateTextArray.push(`"dueDate" = ($${updateTextArray.length + 1})`);
+    updateValuesArray.push(dueDate);
+  }
+
+  updateValuesArray.push(id);
+
+  const updateQueryText = `UPDATE todos SET ${updateTextArray.join(
+    ", "
+  )} WHERE id = ($${updateValuesArray.length}) returning *`;
+
+  const updatedTodo = await client.query(updateQueryText, updateValuesArray);
+
+  updatedTodo.rowCount === 1
+    ? res.status(200).json(updatedTodo.rows)
+    : res.status(404).json({
+        status: "Error",
+        id: "Could not find a todo with that id",
+      });
 });
 
 // DELETE /items/:id
@@ -122,13 +110,13 @@ app.delete("/items/:id", async (req, res) => {
 
   if (didRemove) {
     res.status(200).json({
-      status: "success",
-      message: `Deleted signature with id ${id}`,
+      status: "Success",
+      message: `Deleted todo with id ${id}`,
     });
   } else {
     res.status(404).json({
-      status: "fail",
-      message: "Could not find a signature with that id identifier",
+      status: "Error",
+      message: "Could not find a todo with that id identifier",
     });
   }
 });
