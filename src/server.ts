@@ -56,7 +56,7 @@ app.get("/items/:id", async (req, res) => {
 
 // POST /items
 app.post("/items", async (req, res) => {
-  const { description } = req.body;
+  const { description, dueDate } = req.body;
   const createdTodo = await client.query(
     `insert into todos (description, "dueDate") values ($1, $2) returning *`,
     [description, dueDate]
